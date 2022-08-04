@@ -5,8 +5,10 @@ pipeline {
     }
     stages {
         agent {
-            image: 'yarnpkg/node-yarn'
-            args '-u 0:0'
+            docker {
+                image: 'yarnpkg/node-yarn'
+                args '-u 0:0'
+            }
         }
         stage('Test') { 
             steps {
