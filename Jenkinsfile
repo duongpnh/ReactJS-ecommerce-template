@@ -1,12 +1,13 @@
 pipeline {
-    agent {
-        image: 'yarnpkg/node-yarn'
-        args '-u 0:0'
-    }
+    agent none
     environment {
         DOCKER_IMG = 'ecommerce/template1'
     }
     stages {
+        agent {
+            image: 'yarnpkg/node-yarn'
+            args '-u 0:0'
+        }
         stage('Test') { 
             steps {
                 sh 'yarn'
