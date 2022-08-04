@@ -4,13 +4,13 @@ pipeline {
         DOCKER_IMG = 'ecommerce/template1'
     }
     stages {
-        agent {
-            docker {
-                image: 'yarnpkg/node-yarn'
-                args '-u 0:0'
-            }
-        }
         stage('Test') { 
+            agent {
+                docker {
+                    image: 'yarnpkg/node-yarn'
+                    args '-u 0:0'
+                }
+            }
             steps {
                 sh 'yarn'
             }
