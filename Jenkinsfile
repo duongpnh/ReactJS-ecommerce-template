@@ -7,12 +7,12 @@ pipeline {
         stage('Test') { 
             agent {
                 docker {
-                    image 'yarnpkg/node-yarn'
+                    image 'node:12'
                     args '-u 0:0'
                 }
             }
             steps {
-                sh 'yarn'
+                sh 'npm install'
             }
         }
         // stage('Build') { 
