@@ -1,37 +1,44 @@
 pipeline {
-    agent none
-    environment {
-        DOCKER_IMG = 'ecommerce/template1'
+  agent any
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  environment {
+    HEROKU_API_KEY = credentials('heroku')
+    IMAGE_NAME = 'jenkins/jenkins-shop-react'
+    IMAGE_TAG = 'latest'
+    APP_NAME = 'jenkins-shop-react'
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+      }
     }
-    stages {
-        stage('Test') { 
-            agent {
-                docker {
-                    image 'node:12'
-                    args '-u 0:0'
-                }
-            }
-            steps {
-                sh 'npm install'
-            }
-        }
-        // stage('Build') { 
-        //     steps {
-        //         sh 'yarn'
-        //     }
-        // }
-        // stage('Deploy') { 
-        //     steps {
-        //         sh 'yarn'
-        //     }
-        // }
+    stage('Login') {
+      steps {
+        sh 'echo $HEROKU_API_KEY | docker login --username=_ --password-stdin registry.heroku.com'
+      }
     }
-    post {
-        success {
-            echo "SUCCESS"
-        }
-        failure {
-            echo 'FAILED'
-        }
+    stage('Push to Heroku registry') {
+      steps {
+        sh '''
+          docker tag $IMAGE_NAME:$IMAGE_TAG registry.heroku.com/$APP_NAME/web
+          docker push registry.heroku.com/$APP_NAME/web
+        '''
+      }
     }
+    stage('Release the image') {
+      steps {
+        sh '''
+          heroku container:release web --app=$APP_NAME
+        '''
+      }
+    }
+  }
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
 }
